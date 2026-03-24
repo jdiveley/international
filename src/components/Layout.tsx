@@ -13,7 +13,7 @@ export default function Layout() {
           <NavLink to="/" className="group">
             <p className="text-xs text-stone-400 font-sans uppercase tracking-widest">Around the World in</p>
             <h1 className="font-serif text-2xl text-stone-800 leading-tight group-hover:text-amber-700 transition-colors">
-              195 Dishes
+              196 Dishes
             </h1>
           </NavLink>
           <nav className="flex gap-6 items-center">
