@@ -1,0 +1,15 @@
+{
+  "posts": [
+    {
+      "country": "Australia",
+      "dish": "Meat Pie",
+      "weekNumber": 9,
+      "title": "Aussies right?",
+      "content": "Tami is absolutely in the top 4 to 10 favorite Aussies.",
+      "rating": 3,
+      "date": "2026-03-23",
+      "id": "rPUs3HZTnOY"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

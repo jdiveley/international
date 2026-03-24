@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(update-config)",
+      "Bash(claude mcp:*)",
+      "Bash(npx -y @modelcontextprotocol/server-github --version)",
+      "Bash(docker --version)",
+      "Bash(npx -y @github/mcp-server)",
+      "Bash(claude install:*)",
+      "Bash(~/.local/bin/claude --version)",
+      "Bash(find /home/keli/projects/keli -type f -not -path */.*)",
+      "Bash(npm create:*)",
+      "Bash(npx --yes create-vite@latest . --template react-ts)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(/home/keli/projects/keli/src/vite-env.d.ts:*)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(pm2:*)",
+      "Bash(sudo env:*)",
+      "Bash(head -30 grep -n \"country\\\\|flag\" /home/keli/projects/keli/src/pages/BlogPage.tsx grep -n \"country\\\\|flag\" /home/keli/projects/keli/src/pages/BlogPostPage.tsx)",
+      "Bash(curl -s http://localhost:3001/posts)",
+      "Bash(curl:*)",
+      "Bash(kill:*)",
+      "mcp__github__create_repository",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git config:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
