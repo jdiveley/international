@@ -2,11 +2,40 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { recipes } from '../data/recipes'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { Flag } from '../components/Flag'
+import type { Recipe } from '../types'
 
 const STARS = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 function toSlug(country: string) {
   return country.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
+function toISO8601Duration(time: string): string {
+  const hours = time.match(/(\d+)\s*h/i)?.[1]
+  const minutes = time.match(/(\d+)\s*m/i)?.[1]
+  let result = 'PT'
+  if (hours) result += `${hours}H`
+  if (minutes) result += `${minutes}M`
+  return result || 'PT0M'
+}
+
+function buildJsonLd(recipe: Recipe) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Recipe',
+    name: recipe.dish,
+    description: recipe.description,
+    recipeCuisine: recipe.country,
+    prepTime: toISO8601Duration(recipe.prepTime),
+    cookTime: toISO8601Duration(recipe.cookTime),
+    totalTime: toISO8601Duration(recipe.totalTime),
+    recipeYield: `${recipe.servings} servings`,
+    recipeIngredient: recipe.ingredients,
+    recipeInstructions: recipe.instructions.map(text => ({
+      '@type': 'HowToStep',
+      text,
+    })),
+  }
 }
 
 const DIFFICULTY_COLOR = {
@@ -37,7 +66,14 @@ export default function RecipePage() {
   const { posts } = useBlogPosts()
   const journalEntries = posts.filter(p => p.country === recipe.country)
 
+  const jsonLd = buildJsonLd(recipe)
+
   return (
+    <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
     <div className="max-w-3xl mx-auto px-4 py-10">
       {/* Back */}
       <button
@@ -206,5 +242,6 @@ export default function RecipePage() {
         ) : <div className="flex-1" />}
       </div>
     </div>
+    </>
   )
 }
