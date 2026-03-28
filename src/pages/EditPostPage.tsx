@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { recipes } from '../data/recipes'
@@ -54,16 +54,29 @@ export default function EditPostPage() {
 
   const post = id ? getPost(id) : undefined
 
-  const [country, setCountry] = useState(post?.country ?? '')
-  const [dish, setDish] = useState(post?.dish ?? '')
-  const [weekNumber, setWeekNumber] = useState(String(post?.weekNumber ?? ''))
-  const [title, setTitle] = useState(post?.title ?? '')
-  const [content, setContent] = useState(post?.content ?? '')
-  const [rating, setRating] = useState(post?.rating ?? 3)
-  const [date, setDate] = useState(post?.date ?? new Date().toISOString().split('T')[0])
-  const [photos, setPhotos] = useState<string[]>(post?.photos ?? [])
+  const [country, setCountry] = useState('')
+  const [dish, setDish] = useState('')
+  const [weekNumber, setWeekNumber] = useState('')
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [rating, setRating] = useState(3)
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [photos, setPhotos] = useState<string[]>([])
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (post) {
+      setCountry(post.country)
+      setDish(post.dish)
+      setWeekNumber(String(post.weekNumber))
+      setTitle(post.title)
+      setContent(post.content)
+      setRating(post.rating)
+      setDate(post.date)
+      setPhotos(post.photos ?? [])
+    }
+  }, [post?.id])
 
   if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />
 
