@@ -21,6 +21,7 @@ All routes live under a shared `<Layout>` (nav + footer). Routes:
 - `/recipe/:slug` — Full recipe (slug = country name lowercased, spaces → hyphens, symbols removed)
 - `/blog` — Journal listing
 - `/blog/:id` — Single journal entry
+- `/blog/:id/edit` — Edit an existing entry (password-gated)
 - `/blog/new` — New entry form (accepts `?country=&dish=&week=` query params pre-filled from recipe pages)
 
 ### Data (`src/data/recipes.ts`)
@@ -29,7 +30,10 @@ Single exported `recipes: Recipe[]` array, sorted alphabetically by country. Eac
 To add more countries: append to the `recipes` array in `src/data/recipes.ts`. The array index (0-based) determines the recipe number shown in the UI, so always keep it alphabetically sorted.
 
 ### Blog / Journal (`src/hooks/useBlogPosts.ts`)
-Posts are persisted in `localStorage` under the key `world-recipes-blog-posts`. The `useBlogPosts()` hook exposes `{ posts, addPost, deletePost, getPost }`. No backend required.
+Posts are stored in `db.json` via json-server (REST API at `http://localhost:3001`). The `useBlogPosts()` hook exposes `{ posts, loading, addPost, updatePost, deletePost, getPost }`.
+
+- Posts support optional `photos?: string[]` — base64 JPEG data URLs, auto-compressed to max 1200px / 80% quality via Canvas before upload.
+- Edit page (`EditPostPage`) uses `useEffect` to populate form fields after the async fetch completes — do not use `useState` initializers directly from `getPost()` since data isn't available on first render.
 
 ### Slug utility
 Both `HomePage` and `RecipePage` use the same inline slug function — if you refactor it, extract to `src/utils/slug.ts` and update both pages.
@@ -40,8 +44,18 @@ Both `HomePage` and `RecipePage` use the same inline slug function — if you re
 The build also pre-renders static HTML files: the `recipePrerender` Vite plugin in `vite.config.ts` runs after every `npm run build` and writes `dist/recipe/[slug]/index.html` for all 196 recipes, each containing the JSON-LD in `<head>`. This is necessary because Mealie's scraper doesn't execute JavaScript.
 
 ### Production deployment
-Production is served by `serve` (static file server, not `vite preview`) via pm2 on port 4173:
+Two pm2 processes:
+
+**`keli-json-server`** — json-server on port 3001, watches `db.json`:
 ```bash
-pm2 start serve --name "world-recipes" -- /home/keli/projects/keli/dist -l 4173
+pm2 start bash --name "keli-json-server" -- -c "npm run server"
 ```
-`serve` (without `-s`) serves pre-rendered per-recipe HTML files directly by path, while React Router handles client-side navigation for app routes.
+
+**`world-recipes`** — Express static server on port 4173 (`static-server.js`):
+```bash
+pm2 start node --name "world-recipes" -- /home/keli/projects/keli/static-server.js
+```
+
+`static-server.js` proxies `/api/*` to json-server on port 3001 (via `http-proxy-middleware`) and serves pre-rendered static files from `dist/`. The proxy is essential — `vite preview` and `serve` don't support proxying, so API calls would silently 404 without it.
+
+After any code change: `npm run build` then `pm2 restart world-recipes`.
