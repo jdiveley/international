@@ -21,6 +21,10 @@ export function useBlogPosts() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newPost),
     })
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`${res.status} ${res.statusText}: ${text}`)
+    }
     const saved: BlogPost = await res.json()
     setPosts(prev => [saved, ...prev])
     return saved.id

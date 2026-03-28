@@ -65,17 +65,34 @@ export default function NewPostPage() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [photos, setPhotos] = useState<string[]>([])
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  function compressImage(file: File): Promise<string> {
+    return new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onload = ev => {
+        const img = new Image()
+        img.onload = () => {
+          const MAX = 1200
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height))
+          const canvas = document.createElement('canvas')
+          canvas.width = Math.round(img.width * scale)
+          canvas.height = Math.round(img.height * scale)
+          canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+          resolve(canvas.toDataURL('image/jpeg', 0.8))
+        }
+        img.src = ev.target!.result as string
+      }
+      reader.readAsDataURL(file)
+    })
+  }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     files.forEach(file => {
-      const reader = new FileReader()
-      reader.onload = ev => {
-        if (ev.target?.result) {
-          setPhotos(prev => [...prev, ev.target!.result as string])
-        }
-      }
-      reader.readAsDataURL(file)
+      compressImage(file).then(dataUrl => {
+        setPhotos(prev => [...prev, dataUrl])
+      })
     })
     e.target.value = ''
   }
@@ -103,17 +120,24 @@ export default function NewPostPage() {
       setError('Please fill in all fields.')
       return
     }
-    const id = await addPost({
-      country,
-      dish,
-      weekNumber: parseInt(weekNumber),
-      title,
-      content,
-      rating,
-      date,
-      photos,
-    })
-    navigate(`/blog/${id}`)
+    setSubmitting(true)
+    setError('')
+    try {
+      const id = await addPost({
+        country,
+        dish,
+        weekNumber: parseInt(weekNumber),
+        title,
+        content,
+        rating,
+        date,
+        photos,
+      })
+      navigate(`/blog/${id}`)
+    } catch (err) {
+      setError(`Failed to save: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      setSubmitting(false)
+    }
   }
 
   const labelClass = 'block text-sm font-medium text-stone-700 mb-1'
@@ -261,9 +285,10 @@ export default function NewPostPage() {
         <div className="flex gap-3">
           <button
             type="submit"
-            className="bg-amber-700 text-white font-medium px-6 py-2.5 rounded-full hover:bg-amber-800 transition-colors text-sm"
+            disabled={submitting}
+            className="bg-amber-700 text-white font-medium px-6 py-2.5 rounded-full hover:bg-amber-800 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Save entry
+            {submitting ? 'Saving…' : 'Save entry'}
           </button>
           <button
             type="button"
