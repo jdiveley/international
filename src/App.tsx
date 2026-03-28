@@ -5,6 +5,7 @@ import RecipePage from './pages/RecipePage'
 import BlogPage from './pages/BlogPage'
 import BlogPostPage from './pages/BlogPostPage'
 import NewPostPage from './pages/NewPostPage'
+import EditPostPage from './pages/EditPostPage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="blog" element={<BlogPage />} />
           <Route path="blog/:id" element={<BlogPostPage />} />
           <Route path="blog/new" element={<NewPostPage />} />
+          <Route path="blog/:id/edit" element={<EditPostPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

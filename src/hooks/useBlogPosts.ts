@@ -30,6 +30,20 @@ export function useBlogPosts() {
     return saved.id
   }
 
+  async function updatePost(id: string, updates: Omit<BlogPost, 'id'>): Promise<void> {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...updates, id }),
+    })
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`${res.status} ${res.statusText}: ${text}`)
+    }
+    const saved: BlogPost = await res.json()
+    setPosts(prev => prev.map(p => p.id === id ? saved : p))
+  }
+
   async function deletePost(id: string) {
     await fetch(`${API}/${id}`, { method: 'DELETE' })
     setPosts(prev => prev.filter(p => p.id !== id))
@@ -39,5 +53,5 @@ export function useBlogPosts() {
     return posts.find(p => p.id === id)
   }
 
-  return { posts, loading, addPost, deletePost, getPost }
+  return { posts, loading, addPost, updatePost, deletePost, getPost }
 }

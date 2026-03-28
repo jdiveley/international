@@ -95,12 +95,20 @@ export default function BlogPostPage() {
           View the {post.dish} recipe →
         </Link>
         {isOwner && (
-          <button
-            onClick={handleDelete}
-            className="text-sm text-red-400 hover:text-red-600 transition-colors"
-          >
-            Delete entry
-          </button>
+          <div className="flex gap-4">
+            <Link
+              to={`/blog/${post.id}/edit`}
+              className="text-sm text-amber-700 hover:text-amber-900 transition-colors"
+            >
+              Edit entry
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="text-sm text-red-400 hover:text-red-600 transition-colors"
+            >
+              Delete entry
+            </button>
+          </div>
         )}
       </div>
     </div>
