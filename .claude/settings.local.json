@@ -29,7 +29,14 @@
       "Bash(git branch:*)",
       "Bash(git remote:*)",
       "Bash(git config:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git rm:*)",
+      "Bash(ssh-keygen -t ed25519 -C \"jdiveley@diveley.net\" -f ~/.ssh/id_ed25519 -N \"\")",
+      "Read(//home/keli/.ssh/**)",
+      "Bash(gh auth:*)",
+      "Bash(cat /etc/nginx/sites-enabled/*)",
+      "Bash(cat /etc/nginx/conf.d/*)",
+      "Bash(find /etc/nginx -name *.conf)"
     ]
   }
 }
