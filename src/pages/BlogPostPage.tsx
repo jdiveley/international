@@ -72,6 +72,19 @@ export default function BlogPostPage() {
             ) : null,
           )}
         </div>
+
+        {post.photos && post.photos.length > 0 && (
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {post.photos.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`Photo ${i + 1}`}
+                className="w-full aspect-square object-cover rounded-lg border border-stone-200"
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-between items-center mt-6">

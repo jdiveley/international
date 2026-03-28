@@ -23,4 +23,5 @@ export interface BlogPost {
   title: string
   content: string
   rating: number // 1-5
+  photos?: string[] // base64 data URLs
 }

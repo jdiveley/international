@@ -63,7 +63,26 @@ export default function NewPostPage() {
   const [content, setContent] = useState('')
   const [rating, setRating] = useState(3)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [photos, setPhotos] = useState<string[]>([])
   const [error, setError] = useState('')
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onload = ev => {
+        if (ev.target?.result) {
+          setPhotos(prev => [...prev, ev.target!.result as string])
+        }
+      }
+      reader.readAsDataURL(file)
+    })
+    e.target.value = ''
+  }
+
+  function removePhoto(index: number) {
+    setPhotos(prev => prev.filter((_, i) => i !== index))
+  }
 
   if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />
 
@@ -92,6 +111,7 @@ export default function NewPostPage() {
       content,
       rating,
       date,
+      photos,
     })
     navigate(`/blog/${id}`)
   }
@@ -203,6 +223,37 @@ export default function NewPostPage() {
             className={`${inputClass} resize-y`}
             placeholder="Write about what it was like to cook and eat this dish. How did it turn out? What would you change? What surprised you?"
           />
+        </div>
+
+        {/* Photos */}
+        <div>
+          <label className={labelClass}>Photos</label>
+          <label className="flex items-center gap-2 cursor-pointer w-fit px-4 py-2 border border-dashed border-stone-300 rounded-lg text-sm text-stone-500 hover:border-amber-400 hover:text-amber-700 transition-colors">
+            <span>+ Add photos</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+          </label>
+          {photos.length > 0 && (
+            <div className="flex flex-wrap gap-3 mt-3">
+              {photos.map((src, i) => (
+                <div key={i} className="relative">
+                  <img src={src} className="w-24 h-24 object-cover rounded-lg border border-stone-200" />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(i)}
+                    className="absolute -top-2 -right-2 bg-white border border-stone-200 text-stone-500 hover:text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-xs leading-none shadow-sm"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
