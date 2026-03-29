@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { recipes } from '../data/recipes'
 import { useBlogPosts } from '../hooks/useBlogPosts'
+import { useCooked } from '../hooks/useCooked'
 import { Flag } from '../components/Flag'
 import type { Recipe } from '../types'
 
@@ -65,6 +66,7 @@ export default function RecipePage() {
 
   const { posts } = useBlogPosts()
   const journalEntries = posts.filter(p => p.country === recipe.country)
+  const { isCooked, toggle } = useCooked()
 
   const jsonLd = buildJsonLd(recipe)
 
@@ -85,13 +87,20 @@ export default function RecipePage() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-start justify-between gap-3 mb-2">
           <div>
             <p className="text-sm text-stone-400 font-sans uppercase tracking-widest flex items-center gap-2">
               #{index + 1} · <Flag country={recipe.country} /> {recipe.country}
             </p>
             <h1 className="font-serif text-4xl text-stone-800 leading-tight">{recipe.dish}</h1>
           </div>
+          <button
+            onClick={() => toggle(recipe.country)}
+            title={isCooked(recipe.country) ? 'Mark as not made' : 'Mark as made'}
+            className="shrink-0 text-5xl leading-none mt-1 transition-transform hover:scale-110 active:scale-95"
+          >
+            {isCooked(recipe.country) ? '✅' : '⬜'}
+          </button>
         </div>
         <p className="text-stone-600 mt-4 text-base leading-relaxed">{recipe.description}</p>
       </div>

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { recipes } from '../data/recipes'
 import { Flag } from '../components/Flag'
 import { EarthGlobe } from '../components/EarthGlobe'
+import { useCooked } from '../hooks/useCooked'
 
 function toSlug(country: string) {
   return country.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
@@ -16,6 +17,7 @@ const DIFFICULTY_COLOR = {
 
 export default function HomePage() {
   const [search, setSearch] = useState('')
+  const { isCooked, toggle } = useCooked()
 
   const filtered = recipes.filter(
     r =>
@@ -64,10 +66,17 @@ export default function HomePage() {
             <Link
               key={recipe.country}
               to={`/recipe/${toSlug(recipe.country)}`}
-              className="bg-white rounded-xl border border-stone-200 p-5 hover:border-amber-400 hover:shadow-md transition-all group"
+              className={`relative bg-white rounded-xl border p-5 hover:shadow-md transition-all group ${isCooked(recipe.country) ? 'border-green-400 bg-green-50' : 'border-stone-200 hover:border-amber-400'}`}
             >
               <div className="flex items-start justify-between mb-2">
                 <span className="text-xs text-stone-400 font-mono">#{i + 1}</span>
+                <button
+                  onClick={e => { e.preventDefault(); toggle(recipe.country) }}
+                  title={isCooked(recipe.country) ? 'Mark as not made' : 'Mark as made'}
+                  className={`text-2xl leading-none transition-all ${isCooked(recipe.country) ? 'opacity-100' : 'opacity-0 group-hover:opacity-40 hover:!opacity-100'}`}
+                >
+                  ✅
+                </button>
               </div>
               <h3 className="font-serif text-lg text-stone-800 group-hover:text-amber-700 transition-colors leading-snug">
                 {recipe.dish}

@@ -29,6 +29,9 @@ Single exported `recipes: Recipe[]` array, sorted alphabetically by country. Eac
 
 To add more countries: append to the `recipes` array in `src/data/recipes.ts`. The array index (0-based) determines the recipe number shown in the UI, so always keep it alphabetically sorted.
 
+### Cooked meals (`src/hooks/useCooked.ts`)
+`useCooked()` exposes `{ isCooked, toggle }` — tracks which meals have been made, persisted in `localStorage` under the key `cooked-meals` (a JSON array of country name strings). A ✅ button appears on the recipe page header and on each home page card (visible on hover when not cooked, always visible when cooked). The card also gets a green tint when marked.
+
 ### Blog / Journal (`src/hooks/useBlogPosts.ts`)
 Posts are stored in `db.json` via json-server (REST API at `http://localhost:3001`). The `useBlogPosts()` hook exposes `{ posts, loading, addPost, updatePost, deletePost, getPost }`.
 
