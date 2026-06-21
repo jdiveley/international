@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { recipes } from '../data/recipes'
+import { weekOfDate, weekLabel, currentWeek } from '../utils/weekOf'
 
 const SESSION_KEY = 'journal-auth'
 
@@ -54,15 +55,14 @@ export default function NewPostPage() {
 
   const preCountry = params.get('country') ?? ''
   const preDish = params.get('dish') ?? ''
-  const preWeek = params.get('week') ?? ''
 
   const [country, setCountry] = useState(preCountry)
   const [dish, setDish] = useState(preDish)
-  const [weekNumber, setWeekNumber] = useState(preWeek)
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [weekNumber, setWeekNumber] = useState(String(currentWeek()))
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [rating, setRating] = useState(3)
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [photos, setPhotos] = useState<string[]>([])
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -103,15 +103,15 @@ export default function NewPostPage() {
 
   if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />
 
-  // Auto-fill dish when country is selected from dropdown
   function handleCountryChange(value: string) {
     setCountry(value)
     const found = recipes.find(r => r.country === value)
-    if (found) {
-      setDish(found.dish)
-      const idx = recipes.indexOf(found)
-      setWeekNumber(String(idx + 1))
-    }
+    if (found) setDish(found.dish)
+  }
+
+  function handleDateChange(value: string) {
+    setDate(value)
+    setWeekNumber(String(weekOfDate(value)))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -188,6 +188,15 @@ export default function NewPostPage() {
         {/* Week + Date */}
         <div className="grid grid-cols-2 gap-4">
           <div>
+            <label className={labelClass}>Date cooked</label>
+            <input
+              type="date"
+              value={date}
+              onChange={e => handleDateChange(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
             <label className={labelClass}>Week #</label>
             <input
               type="number"
@@ -196,15 +205,9 @@ export default function NewPostPage() {
               onChange={e => setWeekNumber(e.target.value)}
               className={inputClass}
             />
-          </div>
-          <div>
-            <label className={labelClass}>Date cooked</label>
-            <input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              className={inputClass}
-            />
+            <p className="text-xs text-stone-400 mt-1">
+              Week of {weekLabel(parseInt(weekNumber) || 1)}
+            </p>
           </div>
         </div>
 

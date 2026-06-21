@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { recipes } from '../data/recipes'
+import { weekOfDate, weekLabel } from '../utils/weekOf'
 
 const SESSION_KEY = 'journal-auth'
 
@@ -128,10 +129,12 @@ export default function EditPostPage() {
   function handleCountryChange(value: string) {
     setCountry(value)
     const found = recipes.find(r => r.country === value)
-    if (found) {
-      setDish(found.dish)
-      setWeekNumber(String(recipes.indexOf(found) + 1))
-    }
+    if (found) setDish(found.dish)
+  }
+
+  function handleDateChange(value: string) {
+    setDate(value)
+    setWeekNumber(String(weekOfDate(value)))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -193,12 +196,15 @@ export default function EditPostPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Week #</label>
-            <input type="number" min="1" value={weekNumber} onChange={e => setWeekNumber(e.target.value)} className={inputClass} />
+            <label className={labelClass}>Date cooked</label>
+            <input type="date" value={date} onChange={e => handleDateChange(e.target.value)} className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Date cooked</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputClass} />
+            <label className={labelClass}>Week #</label>
+            <input type="number" min="1" value={weekNumber} onChange={e => setWeekNumber(e.target.value)} className={inputClass} />
+            <p className="text-xs text-stone-400 mt-1">
+              Week of {weekLabel(parseInt(weekNumber) || 1)}
+            </p>
           </div>
         </div>
 

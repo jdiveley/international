@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { Flag } from '../components/Flag'
+import { weekLabel } from '../utils/weekOf'
 
 const STARS = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n)
 const SESSION_KEY = 'journal-auth'
@@ -43,10 +44,12 @@ export default function BlogPostPage() {
       </button>
 
       <div className="bg-white rounded-xl border border-stone-200 p-8">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
           <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
             Week {post.weekNumber}
           </span>
+          <span className="text-xs text-stone-400">{weekLabel(post.weekNumber)}</span>
+          <span className="text-xs text-stone-300">·</span>
           <span className="text-xs text-stone-400 flex items-center gap-1">
             <Flag country={post.country} /> {post.country} · {post.dish}
           </span>

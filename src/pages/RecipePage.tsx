@@ -1,7 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { recipes } from '../data/recipes'
 import { useBlogPosts } from '../hooks/useBlogPosts'
-import { useCooked } from '../hooks/useCooked'
 import { Flag } from '../components/Flag'
 import type { Recipe } from '../types'
 
@@ -66,7 +65,7 @@ export default function RecipePage() {
 
   const { posts } = useBlogPosts()
   const journalEntries = posts.filter(p => p.country === recipe.country)
-  const { isCooked, toggle } = useCooked()
+  const isCooked = journalEntries.length > 0
 
   const jsonLd = buildJsonLd(recipe)
 
@@ -94,13 +93,9 @@ export default function RecipePage() {
             </p>
             <h1 className="font-serif text-4xl text-stone-800 leading-tight">{recipe.dish}</h1>
           </div>
-          <button
-            onClick={() => toggle(recipe.country)}
-            title={isCooked(recipe.country) ? 'Mark as not made' : 'Mark as made'}
-            className="shrink-0 text-5xl leading-none mt-1 transition-transform hover:scale-110 active:scale-95"
-          >
-            {isCooked(recipe.country) ? '✅' : '⬜'}
-          </button>
+          {isCooked && (
+            <span className="shrink-0 text-5xl leading-none mt-1">✅</span>
+          )}
         </div>
         <p className="text-stone-600 mt-4 text-base leading-relaxed">{recipe.description}</p>
       </div>
@@ -215,7 +210,7 @@ export default function RecipePage() {
         <p className="font-serif text-xl mb-2">Made this dish?</p>
         <p className="text-amber-100 text-sm mb-4">Write about your experience in your weekly journal.</p>
         <Link
-          to={`/blog/new?country=${encodeURIComponent(recipe.country)}&dish=${encodeURIComponent(recipe.dish)}&week=${index + 1}`}
+          to={`/blog/new?country=${encodeURIComponent(recipe.country)}&dish=${encodeURIComponent(recipe.dish)}`}
           className="inline-block bg-white text-amber-700 font-semibold text-sm px-5 py-2 rounded-full hover:bg-amber-50 transition-colors"
         >
           Write Blog Entry

@@ -1,14 +1,38 @@
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { Flag } from '../components/Flag'
+import { weekLabel } from '../utils/weekOf'
 
 const STARS = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
 const SESSION_KEY = 'journal-auth'
 
+type SortKey = 'newest' | 'oldest' | 'week-desc' | 'week-asc' | 'rating'
+
+const SORT_LABELS: Record<SortKey, string> = {
+  'newest': 'Newest first',
+  'oldest': 'Oldest first',
+  'week-desc': 'Week (high → low)',
+  'week-asc': 'Week (low → high)',
+  'rating': 'Rating',
+}
+
 export default function BlogPage() {
   const { posts, loading } = useBlogPosts()
   const isOwner = sessionStorage.getItem(SESSION_KEY) === '1'
+  const [sort, setSort] = useState<SortKey>('newest')
+
+  const sorted = useMemo(() => {
+    const copy = [...posts]
+    switch (sort) {
+      case 'newest':    return copy.sort((a, b) => b.date.localeCompare(a.date))
+      case 'oldest':    return copy.sort((a, b) => a.date.localeCompare(b.date))
+      case 'week-desc': return copy.sort((a, b) => b.weekNumber - a.weekNumber)
+      case 'week-asc':  return copy.sort((a, b) => a.weekNumber - b.weekNumber)
+      case 'rating':    return copy.sort((a, b) => b.rating - a.rating)
+    }
+  }, [posts, sort])
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
@@ -17,14 +41,25 @@ export default function BlogPage() {
           <h2 className="font-serif text-4xl text-stone-800">Blog</h2>
           <p className="text-stone-500 mt-1">Weekly reflections on cooking through the world.</p>
         </div>
-        {isOwner && (
-          <Link
-            to="/blog/new"
-            className="bg-amber-700 text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-amber-800 transition-colors whitespace-nowrap"
+        <div className="flex items-center gap-3">
+          <select
+            value={sort}
+            onChange={e => setSort(e.target.value as SortKey)}
+            className="text-sm border border-stone-200 rounded-full px-3 py-1.5 text-stone-600 bg-white hover:border-stone-300 focus:outline-none focus:border-amber-400 cursor-pointer"
           >
-            + New Entry
-          </Link>
-        )}
+            {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
+              <option key={k} value={k}>{SORT_LABELS[k]}</option>
+            ))}
+          </select>
+          {isOwner && (
+            <Link
+              to="/blog/new"
+              className="bg-amber-700 text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-amber-800 transition-colors whitespace-nowrap"
+            >
+              + New Entry
+            </Link>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -45,7 +80,7 @@ export default function BlogPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {posts.map(post => (
+          {sorted.map(post => (
             <Link
               key={post.id}
               to={`/blog/${post.id}`}
@@ -57,6 +92,8 @@ export default function BlogPage() {
                     <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
                       Week {post.weekNumber}
                     </span>
+                    <span className="text-xs text-stone-400">{weekLabel(post.weekNumber)}</span>
+                    <span className="text-xs text-stone-300">·</span>
                     <span className="text-xs text-stone-400 flex items-center gap-1"><Flag country={post.country} /> {post.country}</span>
                   </div>
                   <h3 className="font-serif text-xl text-stone-800 group-hover:text-amber-700 transition-colors leading-snug">
