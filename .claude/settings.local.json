@@ -36,7 +36,30 @@
       "Bash(gh auth:*)",
       "Bash(cat /etc/nginx/sites-enabled/*)",
       "Bash(cat /etc/nginx/conf.d/*)",
-      "Bash(find /etc/nginx -name *.conf)"
+      "Bash(find /etc/nginx -name *.conf)",
+      "Skill(schedule)",
+      "Skill(schedule:*)",
+      "Bash(python3 -c \"import qrcode\")",
+      "Bash(pip3 install:*)",
+      "Bash(pip install:*)",
+      "Bash(apt-get install:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(node -e \":*)",
+      "Bash(node:*)",
+      "Bash(python3 -c \"import json,sys; posts=json.load\\(sys.stdin\\)['posts']; [print\\(f'id={p[\\\\\"id\\\\\"]} date={p[\\\\\"date\\\\\"]} week={p[\\\\\"weekNumber\\\\\"]} title={p[\\\\\"title\\\\\"][:40]}'\\) for p in posts]\")",
+      "Bash(npx tsc *)",
+      "Bash(grep *)",
+      "Bash(python3 *)",
+      "Bash(npx playwright *)",
+      "Bash(lsof -ti:5173 -sTCP:LISTEN)",
+      "Bash(xargs -r kill)",
+      "Bash(disown)",
+      "Bash(timeout 30 bash -c 'until curl -sf http://localhost:5173 >/dev/null; do sleep 1; done')",
+      "Bash(chromium-cli *)",
+      "Bash(npm ls *)",
+      "Read(//home/keli/.cache/ms-playwright/**)",
+      "Bash(find / -maxdepth 6 -iname \"playwright-core\" -type d)",
+      "Bash(npm config *)"
     ]
   }
 }

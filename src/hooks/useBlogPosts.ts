@@ -8,7 +8,7 @@ export function useBlogPosts() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch(`${API}?_sort=-id`)
+    fetch(`${API}`)
       .then(r => r.json())
       .then(data => { setPosts(data); setLoading(false) })
       .catch(() => { setPosts([]); setLoading(false) })

@@ -1,7 +1,10 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { recipes } from '../data/recipes'
+import { commonEquipment } from '../data/equipment'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { Flag } from '../components/Flag'
+import { AmazonLink } from '../components/AmazonLink'
+import { cleanIngredientQuery } from '../utils/amazon'
 import type { Recipe } from '../types'
 
 const STARS = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n)
@@ -128,7 +131,25 @@ export default function RecipePage() {
           {recipe.ingredients.map((ingredient, i) => (
             <li key={i} className="px-5 py-3 text-sm text-stone-700 flex items-start gap-3">
               <span className="text-amber-500 mt-0.5 shrink-0">▪</span>
-              {ingredient}
+              <span className="flex-1">{ingredient}</span>
+              <AmazonLink query={cleanIngredientQuery(ingredient)} label={cleanIngredientQuery(ingredient)} />
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs text-stone-400 mt-2">
+          As an Amazon Associate I earn from qualifying purchases.
+        </p>
+      </section>
+
+      {/* Equipment */}
+      <section className="mb-8">
+        <h2 className="font-serif text-2xl text-stone-800 mb-4">Kitchen Equipment</h2>
+        <ul className="bg-white rounded-xl border border-stone-200 divide-y divide-stone-100">
+          {commonEquipment.map((item, i) => (
+            <li key={i} className="px-5 py-3 text-sm text-stone-700 flex items-start gap-3">
+              <span className="text-amber-500 mt-0.5 shrink-0">▪</span>
+              <span className="flex-1">{item}</span>
+              <AmazonLink query={item} label={item} />
             </li>
           ))}
         </ul>

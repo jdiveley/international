@@ -35,6 +35,9 @@ export default function Layout() {
         <p className="text-center text-stone-400 text-sm font-sans">
           One country. One dish. One week at a time.
         </p>
+        <p className="text-center text-stone-300 text-xs font-sans mt-2">
+          As an Amazon Associate I earn from qualifying purchases.
+        </p>
       </footer>
     </div>
   )
