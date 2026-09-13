@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { recipes } from '../data/recipes'
+import type { Recipe } from '../types'
 import { Flag } from '../components/Flag'
 import { EarthGlobe } from '../components/EarthGlobe'
 import { useCooked } from '../hooks/useCooked'
@@ -21,18 +22,83 @@ const DIFFICULTY_COLOR = {
   Hard: 'bg-red-100 text-red-700',
 }
 
+type IndexedRecipe = { recipe: Recipe; weekNum: number }
+
 export default function HomePage() {
   const [search, setSearch] = useState('')
   const { isCooked } = useCooked()
   const { posts } = useBlogPosts()
 
-  const indexed = recipes.map((recipe, idx) => ({ recipe, weekNum: idx + 1 }))
+  const indexed: IndexedRecipe[] = recipes.map((recipe, idx) => ({ recipe, weekNum: idx + 1 }))
 
-  const filtered = indexed.filter(
-    ({ recipe }) =>
-      recipe.country.toLowerCase().includes(search.toLowerCase()) ||
-      recipe.dish.toLowerCase().includes(search.toLowerCase()),
+  // "Previous week" = last recipe in the list that's been cooked.
+  // "This week" = first recipe in the list that hasn't been cooked yet.
+  let lastCooked: IndexedRecipe | null = null
+  for (let i = indexed.length - 1; i >= 0; i--) {
+    if (isCooked(indexed[i].recipe.country)) {
+      lastCooked = indexed[i]
+      break
+    }
+  }
+  const firstUncooked = indexed.find(item => !isCooked(item.recipe.country)) ?? null
+
+  const searchActive = search.trim() !== ''
+  const pinnedWeeks = new Set(
+    searchActive ? [] : [lastCooked?.weekNum, firstUncooked?.weekNum].filter((w): w is number => w !== undefined),
   )
+  const pinned = [
+    lastCooked && { ...lastCooked, badge: 'Previous Week' },
+    firstUncooked && { ...firstUncooked, badge: 'This Week' },
+  ].filter((item): item is IndexedRecipe & { badge: string } => !!item && !searchActive)
+
+  const matchesSearch = ({ recipe }: IndexedRecipe) =>
+    recipe.country.toLowerCase().includes(search.toLowerCase()) ||
+    recipe.dish.toLowerCase().includes(search.toLowerCase())
+
+  const filtered = indexed.filter(item => !pinnedWeeks.has(item.weekNum) && matchesSearch(item))
+
+  const renderCard = ({ recipe, weekNum, badge }: IndexedRecipe & { badge?: string }) => {
+    const blogEntry = posts.find(p => p.country === recipe.country)
+    const dateLabel = blogEntry
+      ? fmtDate(new Date(blogEntry.date))
+      : `~${fmtDate(weekStartDate(weekNum))}`
+    return (
+      <Link
+        key={recipe.country}
+        to={`/recipe/${toSlug(recipe.country)}`}
+        className={`relative bg-white rounded-xl border p-5 hover:shadow-md transition-all group ${isCooked(recipe.country) ? 'border-green-400 bg-green-50' : 'border-stone-200 hover:border-amber-400'}`}
+      >
+        <div className="flex items-start justify-between mb-2 gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-stone-400 font-mono">#{weekNum}</span>
+            {badge && (
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badge === 'This Week' ? 'bg-amber-100 text-amber-700' : 'bg-stone-100 text-stone-600'}`}>
+                {badge}
+              </span>
+            )}
+          </div>
+          {isCooked(recipe.country) && (
+            <span className="text-2xl leading-none">✅</span>
+          )}
+        </div>
+        <h3 className="font-serif text-lg text-stone-800 group-hover:text-amber-700 transition-colors leading-snug">
+          {recipe.dish}
+        </h3>
+        <p className="text-sm text-stone-500 mt-0.5 mb-3 flex items-center gap-1.5"><Flag country={recipe.country} /> {recipe.country}</p>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${DIFFICULTY_COLOR[recipe.difficulty]}`}>
+              {recipe.difficulty}
+            </span>
+            <span className="text-xs text-stone-400">{recipe.totalTime}</span>
+          </div>
+          <span className={`text-xs ${blogEntry ? 'text-stone-500' : 'text-stone-400'}`}>
+            {dateLabel}
+          </span>
+        </div>
+      </Link>
+    )
+  }
 
   return (
     <div className="bg-black min-h-screen -mt-0"><div className="max-w-5xl mx-auto px-4 py-10">
@@ -66,46 +132,26 @@ export default function HomePage() {
         </p>
       </div>
 
+      {/* Pinned: previous week + this week */}
+      {pinned.length > 0 && (
+        <div className="mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pinned.map(renderCard)}
+          </div>
+          <div className="flex items-center gap-3 mt-8 mb-2">
+            <div className="h-px flex-1 bg-stone-700" />
+            <span className="text-stone-500 text-xs uppercase tracking-wide">All Recipes</span>
+            <div className="h-px flex-1 bg-stone-700" />
+          </div>
+        </div>
+      )}
+
       {/* Grid */}
       {filtered.length === 0 ? (
         <p className="text-center text-stone-500 py-12">No results for "{search}"</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(({ recipe, weekNum }) => {
-            const blogEntry = posts.find(p => p.country === recipe.country)
-            const dateLabel = blogEntry
-              ? fmtDate(new Date(blogEntry.date))
-              : `~${fmtDate(weekStartDate(weekNum))}`
-            return (
-              <Link
-                key={recipe.country}
-                to={`/recipe/${toSlug(recipe.country)}`}
-                className={`relative bg-white rounded-xl border p-5 hover:shadow-md transition-all group ${isCooked(recipe.country) ? 'border-green-400 bg-green-50' : 'border-stone-200 hover:border-amber-400'}`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <span className="text-xs text-stone-400 font-mono">#{weekNum}</span>
-                  {isCooked(recipe.country) && (
-                    <span className="text-2xl leading-none">✅</span>
-                  )}
-                </div>
-                <h3 className="font-serif text-lg text-stone-800 group-hover:text-amber-700 transition-colors leading-snug">
-                  {recipe.dish}
-                </h3>
-                <p className="text-sm text-stone-500 mt-0.5 mb-3 flex items-center gap-1.5"><Flag country={recipe.country} /> {recipe.country}</p>
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${DIFFICULTY_COLOR[recipe.difficulty]}`}>
-                      {recipe.difficulty}
-                    </span>
-                    <span className="text-xs text-stone-400">{recipe.totalTime}</span>
-                  </div>
-                  <span className={`text-xs ${blogEntry ? 'text-stone-500' : 'text-stone-400'}`}>
-                    {dateLabel}
-                  </span>
-                </div>
-              </Link>
-            )
-          })}
+          {filtered.map(renderCard)}
         </div>
       )}
     </div></div>
