@@ -5,6 +5,7 @@ import { useBlogPosts } from '../hooks/useBlogPosts'
 import { Flag } from '../components/Flag'
 import { AmazonLink } from '../components/AmazonLink'
 import { cleanIngredientQuery } from '../utils/amazon'
+import { formatDate } from '../utils/weekOf'
 import type { Recipe } from '../types'
 
 const STARS = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n)
@@ -216,7 +217,7 @@ export default function RecipePage() {
                   <div className="shrink-0 text-right">
                     <p className="text-amber-500 text-sm">{STARS(post.rating)}</p>
                     <p className="text-xs text-stone-400 mt-1">
-                      {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {formatDate(new Date(post.date), { month: 'short', day: 'numeric', year: 'numeric' })}
                     </p>
                   </div>
                 </div>
