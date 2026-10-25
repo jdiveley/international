@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { Flag } from '../components/Flag'
-import { weekLabel } from '../utils/weekOf'
+import { postWeekLabel, formatDate } from '../utils/weekOf'
 
 const STARS = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
@@ -92,7 +92,7 @@ export default function BlogPage() {
                     <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
                       Week {post.weekNumber}
                     </span>
-                    <span className="text-xs text-stone-400">{weekLabel(post.weekNumber)}</span>
+                    <span className="text-xs text-stone-400">{postWeekLabel(post)}</span>
                     <span className="text-xs text-stone-300">·</span>
                     <span className="text-xs text-stone-400 flex items-center gap-1"><Flag country={post.country} /> {post.country}</span>
                   </div>
@@ -106,7 +106,7 @@ export default function BlogPage() {
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-amber-500 text-sm">{STARS(post.rating)}</p>
-                  <p className="text-xs text-stone-400 mt-1">{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  <p className="text-xs text-stone-400 mt-1">{formatDate(new Date(post.date), { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                 </div>
               </div>
             </Link>

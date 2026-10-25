@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { Flag } from '../components/Flag'
-import { weekLabel } from '../utils/weekOf'
+import { postWeekLabel, formatDate } from '../utils/weekOf'
 
 const STARS = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n)
 const SESSION_KEY = 'journal-auth'
@@ -48,7 +48,7 @@ export default function BlogPostPage() {
           <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
             Week {post.weekNumber}
           </span>
-          <span className="text-xs text-stone-400">{weekLabel(post.weekNumber)}</span>
+          <span className="text-xs text-stone-400">{postWeekLabel(post)}</span>
           <span className="text-xs text-stone-300">·</span>
           <span className="text-xs text-stone-400 flex items-center gap-1">
             <Flag country={post.country} /> {post.country} · {post.dish}
@@ -60,7 +60,7 @@ export default function BlogPostPage() {
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-stone-100">
           <p className="text-amber-500 text-lg">{STARS(post.rating)}</p>
           <p className="text-sm text-stone-400">
-            {new Date(post.date).toLocaleDateString('en-US', {
+            {formatDate(new Date(post.date), {
               weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
             })}
           </p>

@@ -6,10 +6,10 @@ import { Flag } from '../components/Flag'
 import { EarthGlobe } from '../components/EarthGlobe'
 import { useCooked } from '../hooks/useCooked'
 import { useBlogPosts } from '../hooks/useBlogPosts'
-import { weekStartDate } from '../utils/weekOf'
+import { weekStartDate, weekAnchor, formatDate } from '../utils/weekOf'
 
 function fmtDate(d: Date): string {
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+  return formatDate(d, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function toSlug(country: string) {
@@ -28,6 +28,7 @@ export default function HomePage() {
   const [search, setSearch] = useState('')
   const { isCooked } = useCooked()
   const { posts } = useBlogPosts()
+  const anchor = weekAnchor(posts)
 
   const indexed: IndexedRecipe[] = recipes.map((recipe, idx) => ({ recipe, weekNum: idx + 1 }))
 
@@ -61,7 +62,7 @@ export default function HomePage() {
     const blogEntry = posts.find(p => p.country === recipe.country)
     const dateLabel = blogEntry
       ? fmtDate(new Date(blogEntry.date))
-      : `~${fmtDate(weekStartDate(weekNum))}`
+      : `~${fmtDate(weekStartDate(weekNum, anchor))}`
     return (
       <Link
         key={recipe.country}

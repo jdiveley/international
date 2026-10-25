@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { recipes } from '../data/recipes'
-import { weekOfDate, weekLabel } from '../utils/weekOf'
+import { weekOfDate, weekLabel, weekAnchor, todayStr } from '../utils/weekOf'
 
 const SESSION_KEY = 'journal-auth'
 
@@ -50,10 +50,12 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 export default function EditPostPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getPost, updatePost, loading } = useBlogPosts()
+  const { posts, getPost, updatePost, loading } = useBlogPosts()
   const [unlocked, setUnlocked] = useState(sessionStorage.getItem(SESSION_KEY) === '1')
 
   const post = id ? getPost(id) : undefined
+  // Anchor on the other entries so changing this one's date re-derives its week
+  const anchor = weekAnchor(posts.filter(p => p.id !== id))
 
   const [country, setCountry] = useState('')
   const [dish, setDish] = useState('')
@@ -61,7 +63,7 @@ export default function EditPostPage() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [rating, setRating] = useState(3)
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(todayStr())
   const [photos, setPhotos] = useState<string[]>([])
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -134,7 +136,7 @@ export default function EditPostPage() {
 
   function handleDateChange(value: string) {
     setDate(value)
-    setWeekNumber(String(weekOfDate(value)))
+    setWeekNumber(String(weekOfDate(value, anchor)))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -203,7 +205,7 @@ export default function EditPostPage() {
             <label className={labelClass}>Week #</label>
             <input type="number" min="1" value={weekNumber} onChange={e => setWeekNumber(e.target.value)} className={inputClass} />
             <p className="text-xs text-stone-400 mt-1">
-              Week of {weekLabel(parseInt(weekNumber) || 1)}
+              Week of {weekLabel(parseInt(weekNumber) || 1, anchor)}
             </p>
           </div>
         </div>

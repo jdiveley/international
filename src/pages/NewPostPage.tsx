@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useBlogPosts } from '../hooks/useBlogPosts'
 import { recipes } from '../data/recipes'
-import { weekOfDate, weekLabel, currentWeek } from '../utils/weekOf'
+import { weekOfDate, weekLabel, weekAnchor, todayStr } from '../utils/weekOf'
 
 const SESSION_KEY = 'journal-auth'
 
@@ -50,7 +50,8 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 export default function NewPostPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const { addPost } = useBlogPosts()
+  const { posts, loading, addPost } = useBlogPosts()
+  const anchor = weekAnchor(posts)
   const [unlocked, setUnlocked] = useState(sessionStorage.getItem(SESSION_KEY) === '1')
 
   const preCountry = params.get('country') ?? ''
@@ -58,14 +59,19 @@ export default function NewPostPage() {
 
   const [country, setCountry] = useState(preCountry)
   const [dish, setDish] = useState(preDish)
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-  const [weekNumber, setWeekNumber] = useState(String(currentWeek()))
+  const [date, setDate] = useState(todayStr())
+  const [weekNumber, setWeekNumber] = useState('')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [rating, setRating] = useState(3)
   const [photos, setPhotos] = useState<string[]>([])
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // Default the week once posts load: the week after the most recent entry
+  useEffect(() => {
+    if (!loading) setWeekNumber(String(Math.max(weekOfDate(date, anchor), anchor.weekNumber + (posts.length ? 1 : 0))))
+  }, [loading])
 
   function compressImage(file: File): Promise<string> {
     return new Promise(resolve => {
@@ -111,7 +117,7 @@ export default function NewPostPage() {
 
   function handleDateChange(value: string) {
     setDate(value)
-    setWeekNumber(String(weekOfDate(value)))
+    setWeekNumber(String(weekOfDate(value, anchor)))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -206,7 +212,7 @@ export default function NewPostPage() {
               className={inputClass}
             />
             <p className="text-xs text-stone-400 mt-1">
-              Week of {weekLabel(parseInt(weekNumber) || 1)}
+              Week of {weekLabel(parseInt(weekNumber) || 1, anchor)}
             </p>
           </div>
         </div>
